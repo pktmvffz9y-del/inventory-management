@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Architecture — Factory Inventory Management</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --muted: #64748b;
+      --text: #e2e8f0;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --amber: #f59e0b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header { padding: 32px 40px 0; }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    header .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    nav.tabs {
+      display: flex;
+      gap: 2px;
+      padding: 20px 40px 0;
+      border-bottom: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    .tab {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    main {
+      padding: 32px 40px;
+      max-width: 1100px;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ---- Tech Stack ---- */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .stack-column {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .stack-column-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stack-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    .stack-column-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .tech-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tech-item:last-child { border-bottom: none; }
+
+    .tech-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #f1f5f9;
+      margin-bottom: 2px;
+    }
+
+    .tech-desc { font-size: 12px; color: var(--muted); }
+
+    /* ---- Architecture ---- */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      max-width: 700px;
+    }
+
+    .arch-layer {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+    }
+
+    .arch-layer-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .arch-layer-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+    }
+
+    .arch-layer-items { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .arch-chip {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .arch-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .arch-arrow-line { width: 2px; height: 18px; background: var(--border); }
+
+    .arch-arrow-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 5px 0;
+    }
+
+    .arch-arrow-head {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--border);
+    }
+
+    /* ---- Data Flow ---- */
+    .flow-steps { display: flex; flex-direction: column; max-width: 700px; }
+
+    .flow-step { display: flex; gap: 16px; align-items: flex-start; }
+
+    .flow-step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .flow-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .flow-connector {
+      width: 2px;
+      flex: 1;
+      min-height: 16px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .flow-body {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 8px;
+      flex: 1;
+    }
+
+    .flow-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    .flow-detail { font-size: 12px; color: var(--muted); }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      background: var(--bg);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--amber);
+    }
+
+    /* ---- API Endpoints ---- */
+    .endpoint-section { margin-bottom: 28px; }
+
+    .endpoint-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .method {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: monospace;
+    }
+
+    .method-get  { background: rgba(16,185,129,0.15); color: #10b981; }
+    .method-post { background: rgba(59,130,246,0.15);  color: #3b82f6; }
+
+    .endpoint-path {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #f1f5f9;
+    }
+
+    .endpoint-params { font-size: 11px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Factory Inventory Management System</h1>
+    <p class="subtitle">System Architecture Reference &mdash; Vue 3 + FastAPI + JSON</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" onclick="showTab('stack', this)">Tech Stack</button>
+    <button class="tab" onclick="showTab('arch', this)">Architecture</button>
+    <button class="tab" onclick="showTab('flow', this)">Data Flow</button>
+    <button class="tab" onclick="showTab('api', this)">API Endpoints</button>
+  </nav>
+
+  <main>
+
+    <!-- TAB 1: Tech Stack -->
+    <section id="stack" class="tab-content active">
+      <div class="stack-grid">
+
+        <div class="stack-column">
+          <div class="stack-column-header">
+            <div class="stack-dot" style="background:#3b82f6"></div>
+            <span class="stack-column-title">Frontend</span>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Vue 3</div>
+            <div class="tech-desc">Composition API, reactive refs and computed properties, SPA</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Vite</div>
+            <div class="tech-desc">Dev server on port 3000, HMR, fast builds</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Vue Router</div>
+            <div class="tech-desc">7 routes: Dashboard, Inventory, Orders, Demand, Spending, Reports, Backlog</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Axios</div>
+            <div class="tech-desc">HTTP client, centralized in <code>api.js</code></div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Composables</div>
+            <div class="tech-desc"><code>useFilters.js</code>, <code>useAuth.js</code>, <code>useI18n.js</code></div>
+          </div>
+        </div>
+
+        <div class="stack-column">
+          <div class="stack-column-header">
+            <div class="stack-dot" style="background:#10b981"></div>
+            <span class="stack-column-title">Backend</span>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Python 3 + FastAPI</div>
+            <div class="tech-desc">REST API on port 8001, async endpoint handlers</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Pydantic</div>
+            <div class="tech-desc">Request/response validation and JSON serialization</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">uvicorn</div>
+            <div class="tech-desc">ASGI server with auto-reload in dev</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">uv</div>
+            <div class="tech-desc">Python package manager and task runner</div>
+          </div>
+        </div>
+
+        <div class="stack-column">
+          <div class="stack-column-header">
+            <div class="stack-dot" style="background:#f59e0b"></div>
+            <span class="stack-column-title">Data</span>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">JSON Files</div>
+            <div class="tech-desc">7 files in <code>server/data/</code> — no database</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">In-Memory Filtering</div>
+            <div class="tech-desc">Loaded once at startup via <code>mock_data.py</code>, filtered per request</div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-name">Datasets</div>
+            <div class="tech-desc">inventory, orders, demand_forecasts, backlog_items, purchase_orders, spending, transactions</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: Architecture -->
+    <section id="arch" class="tab-content">
+      <div class="arch-diagram">
+
+        <div class="arch-layer">
+          <div class="arch-layer-title" style="color:#3b82f6">Browser</div>
+          <div class="arch-layer-name">Vue 3 SPA &mdash; port 3000</div>
+          <div class="arch-layer-items">
+            <span class="arch-chip">Dashboard.vue</span>
+            <span class="arch-chip">Inventory.vue</span>
+            <span class="arch-chip">Orders.vue</span>
+            <span class="arch-chip">Demand.vue</span>
+            <span class="arch-chip">Spending.vue</span>
+            <span class="arch-chip">Reports.vue</span>
+            <span class="arch-chip">Backlog.vue</span>
+            <span class="arch-chip">FilterBar.vue</span>
+            <span class="arch-chip">useFilters.js</span>
+            <span class="arch-chip">api.js</span>
+          </div>
+        </div>
+
+        <div class="arch-arrow">
+          <div class="arch-arrow-line"></div>
+          <div class="arch-arrow-label">HTTP REST &middot; Axios &middot; query params</div>
+          <div class="arch-arrow-line"></div>
+          <div class="arch-arrow-head"></div>
+        </div>
+
+        <div class="arch-layer">
+          <div class="arch-layer-title" style="color:#10b981">API Layer</div>
+          <div class="arch-layer-name">FastAPI &mdash; port 8001</div>
+          <div class="arch-layer-items">
+            <span class="arch-chip">main.py &mdash; 14 endpoints</span>
+            <span class="arch-chip">Pydantic models</span>
+            <span class="arch-chip">apply_filters()</span>
+            <span class="arch-chip">filter_by_month()</span>
+          </div>
+        </div>
+
+        <div class="arch-arrow">
+          <div class="arch-arrow-line"></div>
+          <div class="arch-arrow-label">In-memory read &middot; no DB round-trip</div>
+          <div class="arch-arrow-line"></div>
+          <div class="arch-arrow-head"></div>
+        </div>
+
+        <div class="arch-layer">
+          <div class="arch-layer-title" style="color:#f59e0b">Data Layer</div>
+          <div class="arch-layer-name">JSON Files &mdash; server/data/</div>
+          <div class="arch-layer-items">
+            <span class="arch-chip">inventory.json</span>
+            <span class="arch-chip">orders.json</span>
+            <span class="arch-chip">demand_forecasts.json</span>
+            <span class="arch-chip">backlog_items.json</span>
+            <span class="arch-chip">purchase_orders.json</span>
+            <span class="arch-chip">spending.json</span>
+            <span class="arch-chip">transactions.json</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 3: Data Flow -->
+    <section id="flow" class="tab-content">
+      <div class="flow-steps">
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(59,130,246,0.15);color:#3b82f6">1</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">User changes a filter</div>
+            <div class="flow-detail"><code>FilterBar.vue</code> &mdash; Time Period, Warehouse, Category, or Order Status dropdown</div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(59,130,246,0.15);color:#3b82f6">2</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">Shared filter state updates</div>
+            <div class="flow-detail"><code>useFilters.js</code> singleton composable &mdash; refs: <code>selectedLocation</code>, <code>selectedPeriod</code>, <code>selectedCategory</code>, <code>selectedStatus</code></div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(59,130,246,0.15);color:#3b82f6">3</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">Page component watch() fires</div>
+            <div class="flow-detail">Each view deep-watches <code>getCurrentFilters()</code> &mdash; maps <code>selectedLocation &rarr; warehouse</code>, <code>selectedPeriod &rarr; month</code></div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(245,158,11,0.15);color:#f59e0b">4</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">API call dispatched</div>
+            <div class="flow-detail"><code>api.js</code> builds <code>URLSearchParams</code> &rarr; <code>GET /api/orders?warehouse=Tokyo&amp;category=sensors&amp;month=2025-01</code></div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(16,185,129,0.15);color:#10b981">5</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">FastAPI endpoint receives request</div>
+            <div class="flow-detail"><code>main.py</code> extracts query params &rarr; calls <code>apply_filters(orders, warehouse, category, status)</code></div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(16,185,129,0.15);color:#10b981">6</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">In-memory filtering</div>
+            <div class="flow-detail"><code>apply_filters()</code> case-insensitive match, <code>'all'</code> bypasses. <code>filter_by_month()</code> handles <code>2025-01</code> and <code>Q1-2025</code> quarter formats</div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(16,185,129,0.15);color:#10b981">7</div>
+            <div class="flow-connector"></div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">Pydantic serializes response</div>
+            <div class="flow-detail">Filtered Python dicts validated against <code>Order</code> Pydantic model &rarr; JSON array returned to browser</div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-step-left">
+            <div class="flow-number" style="background:rgba(59,130,246,0.15);color:#3b82f6">8</div>
+          </div>
+          <div class="flow-body">
+            <div class="flow-title">Vue re-renders</div>
+            <div class="flow-detail">Component updates reactive <code>ref</code> &rarr; computed properties recalculate &rarr; DOM updates automatically</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: API Endpoints -->
+    <section id="api" class="tab-content">
+
+      <div class="endpoint-section">
+        <div class="endpoint-section-title">Dashboard</div>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/dashboard/summary</span></td>
+              <td class="endpoint-params">warehouse, category, status, month</td>
+              <td class="endpoint-params">KPI summary object</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="endpoint-section">
+        <div class="endpoint-section-title">Inventory</div>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/inventory</span></td>
+              <td class="endpoint-params">warehouse, category</td>
+              <td class="endpoint-params">List[InventoryItem]</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/inventory/{id}</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">InventoryItem</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="endpoint-section">
+        <div class="endpoint-section-title">Orders</div>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/orders</span></td>
+              <td class="endpoint-params">warehouse, category, status, month</td>
+              <td class="endpoint-params">List[Order]</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/orders/{id}</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">Order</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="endpoint-section">
+        <div class="endpoint-section-title">Demand &amp; Backlog</div>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/demand</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">List[DemandForecast]</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/backlog</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">List[BacklogItem] + has_purchase_order flag</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="endpoint-section">
+        <div class="endpoint-section-title">Spending</div>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/spending/summary</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">Spending summary object</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/spending/monthly</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">Monthly breakdown list</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/spending/categories</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">Spending by category list</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/spending/transactions</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">Recent transactions list</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="endpoint-section">
+        <div class="endpoint-section-title">Reports</div>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/reports/quarterly</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">List of quarterly performance objects</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/reports/monthly-trends</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">List of monthly trend objects</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="endpoint-section">
+        <div class="endpoint-section-title">Purchase Orders</div>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="method method-post">POST</span></td>
+              <td><span class="endpoint-path">/api/purchase-orders</span></td>
+              <td class="endpoint-params">&mdash; (JSON body)</td>
+              <td class="endpoint-params">PurchaseOrder</td>
+            </tr>
+            <tr>
+              <td><span class="method method-get">GET</span></td>
+              <td><span class="endpoint-path">/api/purchase-orders/{id}</span></td>
+              <td class="endpoint-params">&mdash;</td>
+              <td class="endpoint-params">PurchaseOrder</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
