@@ -332,7 +332,7 @@
           </div>
           <div class="tech-item">
             <div class="tech-name">Vue Router</div>
-            <div class="tech-desc">7 routes: Dashboard, Inventory, Orders, Demand, Spending, Reports, Backlog</div>
+            <div class="tech-desc">6 routes: Dashboard, Inventory, Orders, Demand, Spending, Reports</div>
           </div>
           <div class="tech-item">
             <div class="tech-name">Axios</div>
@@ -403,7 +403,6 @@
             <span class="arch-chip">Demand.vue</span>
             <span class="arch-chip">Spending.vue</span>
             <span class="arch-chip">Reports.vue</span>
-            <span class="arch-chip">Backlog.vue</span>
             <span class="arch-chip">FilterBar.vue</span>
             <span class="arch-chip">useFilters.js</span>
             <span class="arch-chip">api.js</span>
@@ -421,7 +420,7 @@
           <div class="arch-layer-title" style="color:#10b981">API Layer</div>
           <div class="arch-layer-name">FastAPI &mdash; port 8001</div>
           <div class="arch-layer-items">
-            <span class="arch-chip">main.py &mdash; 14 endpoints</span>
+            <span class="arch-chip">main.py &mdash; 13 API endpoints</span>
             <span class="arch-chip">Pydantic models</span>
             <span class="arch-chip">apply_filters()</span>
             <span class="arch-chip">filter_by_month()</span>
@@ -676,27 +675,6 @@
               <td><span class="endpoint-path">/api/reports/monthly-trends</span></td>
               <td class="endpoint-params">&mdash;</td>
               <td class="endpoint-params">List of monthly trend objects</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="endpoint-section">
-        <div class="endpoint-section-title">Purchase Orders</div>
-        <table>
-          <thead><tr><th>Method</th><th>Endpoint</th><th>Query Params</th><th>Returns</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><span class="method method-post">POST</span></td>
-              <td><span class="endpoint-path">/api/purchase-orders</span></td>
-              <td class="endpoint-params">&mdash; (JSON body)</td>
-              <td class="endpoint-params">PurchaseOrder</td>
-            </tr>
-            <tr>
-              <td><span class="method method-get">GET</span></td>
-              <td><span class="endpoint-path">/api/purchase-orders/{id}</span></td>
-              <td class="endpoint-params">&mdash;</td>
-              <td class="endpoint-params">PurchaseOrder</td>
             </tr>
           </tbody>
         </table>
