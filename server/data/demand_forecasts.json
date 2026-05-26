@@ -79,5 +79,50 @@
     "forecasted_demand": 96,
     "trend": "stable",
     "period": "Next 30 days"
+  },
+  {
+    "id": "10",
+    "item_sku": "TMP-201",
+    "item_name": "Temperature Sensor Module",
+    "current_demand": 180,
+    "forecasted_demand": 250,
+    "trend": "increasing",
+    "period": "Next 30 days"
+  },
+  {
+    "id": "11",
+    "item_sku": "SRV-301",
+    "item_name": "Micro Servo Motor",
+    "current_demand": 80,
+    "forecasted_demand": 120,
+    "trend": "increasing",
+    "period": "Next 30 days"
+  },
+  {
+    "id": "12",
+    "item_sku": "PSU-508",
+    "item_name": "Battery Backup Power Supply",
+    "current_demand": 80,
+    "forecasted_demand": 150,
+    "trend": "increasing",
+    "period": "Next 30 days"
+  },
+  {
+    "id": "13",
+    "item_sku": "HMD-202",
+    "item_name": "Humidity Sensor Module",
+    "current_demand": 100,
+    "forecasted_demand": 200,
+    "trend": "increasing",
+    "period": "Next 30 days"
+  },
+  {
+    "id": "14",
+    "item_sku": "STP-304",
+    "item_name": "Stepper Motor NEMA 23",
+    "current_demand": 60,
+    "forecasted_demand": 150,
+    "trend": "increasing",
+    "period": "Next 30 days"
   }
 ]

@@ -2,6 +2,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
+from datetime import datetime, timedelta
+import json
+import os
+import mock_data
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
 
 app = FastAPI(title="Factory Inventory Management System")
@@ -119,6 +123,30 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class RestockingRecommendation(BaseModel):
+    item_sku: str
+    item_name: str
+    quantity_on_hand: int
+    reorder_point: int
+    forecasted_demand: int
+    quantity_to_order: int
+    unit_cost: float
+    total_cost: float
+    trend: str
+    priority: int  # 3=increasing+urgent, 2=increasing, 1=urgent, 0=other
+
+class RestockingOrder(BaseModel):
+    id: str
+    order_number: str
+    status: str
+    order_date: str
+    expected_delivery: str
+    total_value: float
+    items: List[dict]
+
+class CreateRestockingOrderRequest(BaseModel):
+    items: List[dict]  # {sku, name, quantity, unit_price}
 
 # API endpoints
 @app.get("/")
@@ -303,6 +331,67 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking/recommendations", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations():
+    """Return demand-based restocking recommendations sorted by priority."""
+    inventory_map = {item["sku"]: item for item in inventory_items}
+    results = []
+    for forecast in demand_forecasts:
+        inv = inventory_map.get(forecast["item_sku"])
+        if not inv:
+            continue
+        qty_to_order = max(0, forecast["forecasted_demand"] - inv["quantity_on_hand"])
+        if qty_to_order == 0:
+            continue
+        is_increasing = forecast["trend"] == "increasing"
+        is_urgent = inv["quantity_on_hand"] < inv["reorder_point"]
+        priority = (2 if is_increasing else 0) + (1 if is_urgent else 0)
+        results.append(RestockingRecommendation(
+            item_sku=forecast["item_sku"],
+            item_name=forecast["item_name"],
+            quantity_on_hand=inv["quantity_on_hand"],
+            reorder_point=inv["reorder_point"],
+            forecasted_demand=forecast["forecasted_demand"],
+            quantity_to_order=qty_to_order,
+            unit_cost=inv["unit_cost"],
+            total_cost=round(qty_to_order * inv["unit_cost"], 2),
+            trend=forecast["trend"],
+            priority=priority,
+        ))
+    # Sort by priority desc, then by demand gap desc
+    results.sort(key=lambda x: (-x.priority, -(x.forecasted_demand - x.quantity_on_hand)))
+    return results
+
+@app.post("/api/restocking-orders", response_model=RestockingOrder, status_code=201)
+def create_restocking_order(request: CreateRestockingOrderRequest):
+    """Submit a restocking order and persist it to restocking_orders.json."""
+    now = datetime.utcnow()
+    new_id = str(len(mock_data.restocking_orders) + 1)
+    order_number = f"REST-{now.year}-{int(new_id):04d}"
+    total_value = round(
+        sum(item["quantity"] * item["unit_price"] for item in request.items), 2
+    )
+    order = {
+        "id": new_id,
+        "order_number": order_number,
+        "status": "Submitted",
+        "order_date": now.isoformat(),
+        "expected_delivery": (now + timedelta(days=14)).isoformat(),
+        "total_value": total_value,
+        "items": request.items,
+    }
+    mock_data.restocking_orders.append(order)
+    # Persist to disk so orders survive server restarts
+    data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "restocking_orders.json")
+    with open(data_path, "w") as f:
+        json.dump(mock_data.restocking_orders, f, indent=2)
+    return order
+
+@app.get("/api/restocking-orders", response_model=List[RestockingOrder])
+def get_restocking_orders():
+    """Return all submitted restocking orders."""
+    return mock_data.restocking_orders
 
 if __name__ == "__main__":
     import uvicorn
