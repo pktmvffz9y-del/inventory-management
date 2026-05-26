@@ -1,0 +1,126 @@
+[
+  {
+    "id": "1",
+    "order_number": "REST-2026-0001",
+    "status": "Submitted",
+    "order_date": "2026-05-26T09:57:38.679207",
+    "expected_delivery": "2026-06-09T09:57:38.679207",
+    "total_value": 44562.5,
+    "items": [
+      {
+        "sku": "TMP-201",
+        "name": "Temperature Sensor Module",
+        "quantity": 125,
+        "unit_price": 89.5
+      },
+      {
+        "sku": "SRV-301",
+        "name": "Micro Servo Motor",
+        "quantity": 75,
+        "unit_price": 445
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "order_number": "REST-2026-0002",
+    "status": "Submitted",
+    "order_date": "2026-05-26T09:58:26.065356",
+    "expected_delivery": "2026-06-09T09:58:26.065356",
+    "total_value": 2500.0,
+    "items": [
+      {
+        "sku": "WDG-001",
+        "name": "Industrial Widget Type A",
+        "quantity": 100,
+        "unit_price": 25.0
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "order_number": "REST-2026-0003",
+    "status": "Submitted",
+    "order_date": "2026-05-26T09:58:26.068426",
+    "expected_delivery": "2026-06-09T09:58:26.068426",
+    "total_value": 500.0,
+    "items": [
+      {
+        "sku": "WDG-001",
+        "name": "Industrial Widget Type A",
+        "quantity": 10,
+        "unit_price": 50.0
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "order_number": "REST-2026-0004",
+    "status": "Submitted",
+    "order_date": "2026-05-26T09:58:26.079317",
+    "expected_delivery": "2026-06-09T09:58:26.079317",
+    "total_value": 100.0,
+    "items": [
+      {
+        "sku": "WDG-001",
+        "name": "Industrial Widget Type A",
+        "quantity": 5,
+        "unit_price": 20.0
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "order_number": "REST-2026-0005",
+    "status": "Submitted",
+    "order_date": "2026-05-26T09:58:26.089761",
+    "expected_delivery": "2026-06-09T09:58:26.089761",
+    "total_value": 550.0,
+    "items": [
+      {
+        "sku": "WDG-001",
+        "name": "Widget A",
+        "quantity": 10,
+        "unit_price": 25.0
+      },
+      {
+        "sku": "GSK-203",
+        "name": "Gasket B",
+        "quantity": 20,
+        "unit_price": 15.0
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "order_number": "REST-2026-0006",
+    "status": "Submitted",
+    "order_date": "2026-05-26T09:58:26.098195",
+    "expected_delivery": "2026-06-09T09:58:26.098195",
+    "total_value": 4475.0,
+    "items": [
+      {
+        "sku": "SNR-420",
+        "name": "Temperature Sensor",
+        "quantity": 50,
+        "unit_price": 89.5
+      }
+    ]
+  },
+  {
+    "id": "7",
+    "order_number": "REST-2026-0007",
+    "status": "Submitted",
+    "order_date": "2026-05-26T09:58:26.109162",
+    "expected_delivery": "2026-06-09T09:58:26.109162",
+    "total_value": 10.0,
+    "items": [
+      {
+        "sku": "WDG-001",
+        "name": "Widget",
+        "quantity": 1,
+        "unit_price": 10.0
+      }
+    ]
+  }
+]
